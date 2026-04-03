@@ -1,0 +1,16 @@
+{
+	"description": "Nox SDK for D",
+	"license": "proprietary",
+	"authors": [
+		"yendy"
+	],
+	"copyright": "\"\"",
+	"name": "nox-d",
+    "targetType": "library",
+    "sourceFiles": ["include/nox.h"],
+    "cImportPaths": ["include", "/usr/include"],
+    "dflags": ["-P-D_GNU_SOURCE"],
+    "preBuildCommands": [
+        "dstep include/nox.h -o source/nox.di -D_GNU_SOURCE -Iinclude -I/usr/include"
+    ]
+}
