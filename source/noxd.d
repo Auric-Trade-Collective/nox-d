@@ -82,3 +82,34 @@ public NoxObj noxFile(string filename) {
 
     return obj;
 }
+
+
+extern(C) public bool tryGetResponseHeader(HttpResponse *resp, string key, size_t index, out string ot) {
+    char *ptr;
+    int check = TryGetResponseHeader(resp, cast(char *)key.toStringz, cast(size_t)index, &ptr);
+
+    ot = fromStringz(ptr).idup;
+    free(ptr);
+
+    return (check == 1) ? true : false;
+}
+
+extern(C) public bool trySetResponseHeader(HttpResponse *resp, string key, string val, bool append = false) {
+    int check = TrySetResponseHeader(resp, cast(char *)key.toStringz, cast(char *)val.toStringz, (append) ? 1 : 0);
+    return (check == 1) ? true : false;
+}
+
+extern(C) public bool tryGetRequestHeader(HttpRequest *req, string key, size_t index, out string ot) {
+    char *ptr;
+    int check = TryGetRequestHeader(req, cast(char *)key.toStringz, cast(size_t)index, &ptr);
+
+    ot = fromStringz(ptr).idup;
+    free(ptr);
+
+    return (check == 1) ? true : false;
+}
+
+extern(C) public bool trySetRequestHeader(HttpRequest *req, string key, string val, bool append = false) {
+    int check = TrySetRequestHeader(req, cast(char *)key.toStringz, cast(char *)val.toStringz, (append) ? 1 : 0); 
+    return (check == 1) ? true : false;
+}
