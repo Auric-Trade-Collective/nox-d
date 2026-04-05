@@ -174,11 +174,12 @@ extern(C) string tryGetCookie(HttpRequest *req, string key) {
     return fromStringz(ptr).idup;
 }
 
-extern(C) void trySetCookie(HttpResponse *resp, 
+extern(C) bool trySetCookie(HttpResponse *resp, 
                              string key, string value, 
                              string path, long expires, 
                              bool secure, bool httponly) {
-    TrySetCookie(resp, cast(char *)key.toStringz, cast(char *)value.toStringz,
+    int ret = TrySetCookie(resp, cast(char *)key.toStringz, cast(char *)value.toStringz,
                        cast(char *)path.toStringz, cast(c_long)expires,
                        secure, httponly);
+    return (ret == 1) ? true : false;
 }
