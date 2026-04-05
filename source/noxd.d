@@ -120,20 +120,16 @@ extern(C) public ulong readBody(HttpRequest *req, out ubyte[] buff, ulong maxRea
     string lenStr; 
     if(tryGetRequestHeader(req, "Content-Length", 0, lenStr)) {
         ulong len = lenStr.to!ulong;
-        ubyte *b = cast(ubyte *)malloc(ubyte.sizeof * len);
-        ulong read = ReadBody(req, b, len);
+        ubyte[] b = new ubyte[](len);
+        ulong read = ReadBody(req, b.ptr, len);
 
-        buff = b[0..read].dup;
-        free(b);
-
+        buff = b[0..read];
         return read;
     }
 
-    ubyte *b = cast(ubyte *)malloc(ubyte.sizeof * maxRead);
-    ulong read = ReadBody(req, b, maxRead);
-
-    buff = b[0..read].dup;
-    free(b);
+    ubyte[] b = new ubyte[](maxRead);
+    ulong read = ReadBody(req, b.ptr, maxRead);
+    buff = b[0..read];
 
     return read;
 }
