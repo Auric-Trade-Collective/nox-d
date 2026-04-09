@@ -191,3 +191,43 @@ extern(C) public string getEnv(string secret, string key) {
 
     return null;
 }
+
+class NoxLogger {
+    private char *namespace;
+
+    public this(string namespace) shared {
+        this.namespace = cast(shared(char *))namespace.toStringz;
+        LogDebug(cast(char *)this.namespace, cast(char *)"Nox-D logging initialized...".toStringz);
+    }
+
+    public void write(string message) shared {
+        auto self = cast(NoxLogger)this;
+        char *nmepsace = self.namespace;
+        LogWrite(nmepsace, cast(char *)message.toStringz);
+    }
+
+
+    public void warn(string message) shared {
+        auto self = cast(NoxLogger)this;
+        char *nmepsace = self.namespace;
+        LogWarn(nmepsace, cast(char *)message.toStringz);
+    }
+
+    public void error(string message) shared {
+        auto self = cast(NoxLogger)this;
+        char *nmepsace = self.namespace;
+        LogError(nmepsace, cast(char *)message.toStringz);
+    }
+
+    public void panic(string message) shared {
+        auto self = cast(NoxLogger)this;
+        char *nmepsace = self.namespace;
+        LogPanic(nmepsace, cast(char *)message.toStringz);
+    }
+
+    public void dbg(string message) shared {
+        auto self = cast(NoxLogger)this;
+        char *nmepsace = self.namespace;
+        LogDebug(nmepsace, cast(char *)message.toStringz);
+    }
+}
