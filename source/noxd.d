@@ -3,9 +3,7 @@ module noxd;
 import std;
 import std.exception;
 import std.string : toStringz;
-import std.conv;
-import core.stdc.config : c_long;
-import nox;
+import std.conv; import core.stdc.config : c_long; import nox;
 
 alias HttpRequest = nox.HttpRequest;
 alias HttpResponse = nox.HttpResponse;
@@ -155,7 +153,7 @@ extern(C) public bool tryGetUriParam(HttpRequest *req, string key, out string ot
     return (ret == 1) ? true : false;
 }
 
-extern(C) ulong getUriParamCount(HttpRequest *req, string paramName) {
+extern(C) public ulong getUriParamCount(HttpRequest *req, string paramName) {
     ulong count = GetUriParamCount(req, cast(char *)paramName.toStringz);
     return count;
 }
@@ -163,18 +161,33 @@ extern(C) ulong getUriParamCount(HttpRequest *req, string paramName) {
 // char *TryGetCookie(HttpRequest *req, char *key);
 // void TrySetCookie(HttpResponse *resp, char *key, char *value, char *path, long expires, bool secure, bool httponly);
 
-extern(C) string tryGetCookie(HttpRequest *req, string key) {
+extern(C) public string tryGetCookie(HttpRequest *req, string key) {
     char *ptr = TryGetCookie(req, cast(char *)key.toStringz);
     scope(exit) free(ptr);
 
     return fromStringz(ptr).idup;
 }
 
-extern(C) void trySetCookie(HttpResponse *resp, 
+extern(C) public void trySetCookie(HttpResponse *resp, 
                              string key, string value, 
                              string path, long expires, 
                              bool secure, bool httponly) {
     TrySetCookie(resp, cast(char *)key.toStringz, cast(char *)value.toStringz,
                  cast(char *)path.toStringz, cast(c_long)expires,
                  secure, httponly);
+}
+
+extern(C) public string registerName(NoxEndpointCollection *coll, string name) {
+    char *ret = RegisterName(coll, cast(char *)name.toStringz);
+    writeln(name);
+    return fromStringz(ret).idup;
+}
+
+extern(C) public string getEnv(string secret, string key) {
+    char *val = GetEnv(cast(char *)secret.toStringz, cast(char *)key.toStringz);
+    if(val != null) {
+        return fromStringz(val).idup;
+    }
+
+    return null;
 }

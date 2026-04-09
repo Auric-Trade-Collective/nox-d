@@ -7,6 +7,7 @@
 #include <dlfcn.h> 
 #include <stdlib.h>
 #include <stdio.h>
+#include<sys/random.h>
 
 // APIS
 
@@ -41,6 +42,8 @@ typedef struct {
     int endpointCount;
     authCallback *auth;
     NoxEndpoint *endpoints;
+    char *name;
+    char *secret;
 } NoxEndpointCollection;
 
 typedef void (*createEndpoint)(NoxEndpointCollection*, char*, apiCallback, int);
@@ -84,6 +87,36 @@ static inline void CreateNoxEndpoint(NoxEndpointCollection *coll, char *endpoint
 
     coll->endpoints = ep;
     coll->endpointCount++;
+}
+
+
+void generate_secure_string(char *buffer, size_t length) {
+    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    uint8_t random_data[16]; //tricking nox-d
+
+    // Fill the byte array with cryptographically secure bytes
+    if (getrandom(random_data, length, 0) == -1) {
+        perror("getrandom failed");
+        return;
+    }
+
+    // Map random bytes to your desired characters
+    for (size_t i = 0; i < length; i++) {
+        buffer[i] = charset[random_data[i] % (sizeof(charset) - 1)];
+    }
+    buffer[length] = '\0';
+}
+
+char *RegisterName(NoxEndpointCollection *coll, char *name) {
+    char *secure = (char *)malloc(17);
+    generate_secure_string(secure, 16);
+
+    char *duped = strdup(name);
+
+    coll->name = duped;
+    coll->secret = secure;
+
+    return secure;
 }
 
 static inline void CreateAuth(NoxEndpointCollection *coll, authCallback cb) {
@@ -186,17 +219,17 @@ void CreatePost(NoxEndpointCollection *collection, char *path, apiCallback callb
 void CreatePut(NoxEndpointCollection *collection, char *path, apiCallback callback);
 void CreateDelete(NoxEndpointCollection *collection, char *path, apiCallback callback);
 
-int TryGetResponseHeader(HttpResponse *resp, char *key, size_t index, char **ot);
+int TryGetResponseHeader(HttpResponse *resp, char *key, size_t index, char **out);
 int TrySetResponseHeader(HttpResponse *resp, char *key, char *val, int add);
 
-int TryGetRequestHeader(HttpRequest *resp, char *key, size_t index, char **ot);
+int TryGetRequestHeader(HttpRequest *resp, char *key, size_t index, char **out);
 int TrySetRequestHeader(HttpRequest *resp, char *key, char *val, int add);
 
 // the returned value is how many bytes are read
 size_t ReadBody(HttpRequest *req, uint8_t *buff, size_t bytesToRead);
 
-char *GetUri(HttpRequest *req, size_t *otLength);
-int TryGetUriParam(HttpRequest *req, char *key, size_t index, char **ot, size_t *otLen);
+char *GetUri(HttpRequest *req, size_t *outLength);
+int TryGetUriParam(HttpRequest *req, char *key, size_t index, char **out, size_t *outLen);
 size_t GetUriParamCount(HttpRequest *req, char *paramName);
 
 char *TryGetCookie(HttpRequest *req, char *key);
@@ -206,6 +239,8 @@ void LogWrite(char *name_space, char *msg);
 void LogWarn(char *name_space, char *msg);
 void LogError(char *name_space, char *msg);
 void LogPanic(char *name_space, char *msg);
+
+char *GetEnv(char *secret, char *key);
 
 //PLUGINS
 
