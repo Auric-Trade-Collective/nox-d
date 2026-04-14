@@ -179,7 +179,6 @@ extern(C) public void trySetCookie(HttpResponse *resp,
 
 extern(C) public string registerName(NoxEndpointCollection *coll, string name) {
     char *ret = RegisterName(coll, cast(char *)name.toStringz);
-    writeln(name);
     return fromStringz(ret).idup;
 }
 
