@@ -2,8 +2,7 @@ module noxd;
 
 import std;
 import std.exception;
-import std.string : toStringz;
-import std.conv; import core.stdc.config : c_long; import nox;
+import std.string : toStringz; import std.conv; import core.stdc.config : c_long; import nox;
 
 alias HttpRequest = nox.HttpRequest;
 alias HttpResponse = nox.HttpResponse;
@@ -158,9 +157,6 @@ extern(C) public ulong getUriParamCount(HttpRequest *req, string paramName) {
     return count;
 }
 
-// char *TryGetCookie(HttpRequest *req, char *key);
-// void TrySetCookie(HttpResponse *resp, char *key, char *value, char *path, long expires, bool secure, bool httponly);
-
 extern(C) public string tryGetCookie(HttpRequest *req, string key) {
     char *ptr = TryGetCookie(req, cast(char *)key.toStringz);
     scope(exit) free(ptr);
@@ -189,6 +185,14 @@ extern(C) public string getEnv(string secret, string key) {
     }
 
     return null;
+}
+
+extern(C) public void temporaryRedirect(HttpResponse *resp, HttpRequest *req, string location) {
+    TemporaryRedirect(resp, req, cast(char *)location.toStringz);
+}
+
+extern(C) public void permanentRedirect(HttpResponse *resp, HttpRequest *req, string location) {
+    PermanentRedirect(resp, req, cast(char *)location.toStringz);
 }
 
 class NoxLogger {
